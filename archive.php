@@ -1,51 +1,87 @@
 <?php
 /**
- * The template for displaying archive pages.
+ * The template for displaying Archive pages.
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
+ * Learn more: http://codex.wordpress.org/Template_Hierarchy
  *
  * @package bro
  */
 
 get_header(); ?>
 
-	<div id="primary" class="content-area">
+	<section id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
 
-		<?php
-		if ( have_posts() ) : ?>
+		<?php if ( have_posts() ) : ?>
 
 			<header class="page-header">
+				<h1 class="page-title">
+					<?php
+					if ( is_category() ) :
+						printf( __( 'Posts in the ', 'bro' ) );
+						echo '<em>';
+						single_cat_title();
+						echo '</em> ' . __('category', 'bro') . ':';
+
+					elseif ( is_tag() ) :
+						printf( __( 'Posts with the ', 'bro' ) );
+						echo '<em>';
+						single_tag_title();
+						echo '</em> ' . __('tag', 'bro') . ':';
+
+					elseif ( is_author() ) :
+						printf( __( 'Author: %s', 'bro' ), '<span class="vcard">' . get_the_author() . '</span>' );
+
+					elseif ( is_day() ) :
+						printf( __( 'Posts from %s', 'bro' ), '<span>' . get_the_date() . '</span>' );
+
+					elseif ( is_month() ) :
+						printf( __( 'Posts from %s', 'bro' ), '<span>' . get_the_date( _x( 'F Y', 'monthly archives date format', 'bro' ) ) . '</span>' );
+
+					elseif ( is_year() ) :
+						printf( __( 'Posts from %s', 'bro' ), '<span>' . get_the_date( _x( 'Y', 'yearly archives date format', 'bro' ) ) . '</span>' );
+
+					elseif ( is_tax( 'post_format', 'post-format-aside' ) ) :
+						_e( 'Asides', 'bro' );
+
+					else :
+						_e( 'Archives', 'bro' );
+
+					endif;
+					?>
+				</h1>
 				<?php
-					the_archive_title( '<h1 class="page-title">', '</h1>' );
-					the_archive_description( '<div class="taxonomy-description">', '</div>' );
+					// Show an optional term description.
+					$term_description = term_description();
+					if ( ! empty( $term_description ) ) :
+						printf( '<div class="taxonomy-description">%s</div>', $term_description );
+					endif;
 				?>
 			</header><!-- .page-header -->
 
-			<?php
-			/* Start the Loop */
-			while ( have_posts() ) : the_post();
+			<?php /* Start the Loop */ ?>
+			<?php while ( have_posts() ) : the_post(); ?>
 
-				/*
-				 * Include the Post-Format-specific template for the content.
-				 * If you want to override this in a child theme, then include a file
-				 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
-				 */
-				get_template_part( 'template-parts/content', get_post_format() );
+				<?php
+					/* Include the Post-Format-specific template for the content.
+					 * If you want to override this in a child theme, then include a file
+					 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
+					 */
+					get_template_part( 'content', get_post_format() );
+				?>
 
-			endwhile;
+			<?php endwhile; ?>
 
-			the_posts_navigation();
+			<?php bro_paging_nav(); ?>
 
-		else :
+		<?php else : ?>
 
-			get_template_part( 'template-parts/content', 'none' );
+			<?php get_template_part( 'content', 'none' ); ?>
 
-		endif; ?>
+		<?php endif; ?>
 
 		</main><!-- #main -->
-	</div><!-- #primary -->
+	</section><!-- #primary -->
 
-<?php
-get_sidebar();
-get_footer();
+<?php get_sidebar(); ?>
+<?php get_footer(); ?>
